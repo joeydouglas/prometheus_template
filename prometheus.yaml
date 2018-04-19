@@ -261,12 +261,18 @@ objects:
             miqTarget: "ContainerNode"
             severity: "HIGH"
             message: "{{$labels.instance}} utilized memory exceeds 400M"
-        - alert: Free Memory 
-          expr: sum(sum(kube_node_status_allocatable_memory_bytes {node=~"localhost"}) - sum(container_memory_usage_bytes {instance=~"localhost", container_name=~".+", container_name!="POD"} )) / sum(kube_node_status_allocatable_memory_bytes {node=~"localhost"}) * 100 < 55
+        - alert: Memory Requests
+          expr: sum(sum(kube_node_status_allocatable_memory_bytes {node=~"localhost"}) - sum(kube_pod_container_resource_requests_memory_bytes)) / sum(kube_node_status_allocatable_memory_bytes {node=~"localhost"}) * 100 < 30
           annotations:
             miqTarget: "ContainerNode"
             severity: "HIGH"
-            message: "{{$labels.instance}} Free memory is below 25%"
+            message: "{{$labels.instance}} Memory requests are over 70%"
+        - alert: CPU Requests
+          expr: sum(sum(kube_node_status_allocatable_cpu_cores{node=~"localhost"}) - sum(kube_pod_container_resource_requests_cpu_cores{node=~"localhost"})) / sum(kube_node_status_allocatable_cpu_cores{node=~"localhost"}) * 100 < 30
+          annotations:
+            miqTarget: "ContainerNode"
+            severity: "HIGH"
+            message: "{{$labels.instance}} CPU requests are over 70%"
     prometheus.yml: |
       rule_files:
         - 'prometheus.rules'
@@ -497,7 +503,7 @@ objects:
       global:
       route:
         repeat_interval: 30m
-        group_interval: 30m
+        group_interval: 5m
         receiver: 'rocketchat'
         group_by: []
       receivers:
