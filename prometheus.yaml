@@ -255,18 +255,24 @@ objects:
             miqTarget: "ContainerNode"
             severity: "HIGH"
             message: "{{$labels.instance}} is down"
-        - alert: Memory Alert 
-          expr: sum(container_memory_usage_bytes{container_name=~".+", container_name!="POD"}) > 400000000
+        - alert: Memory Consumption 
+          expr: sum(sum(kube_node_status_allocatable_memory_bytes {node=~"localhost"}) - sum(container_memory_usage_bytes {instance=~"localhost", container_name=~".+", container_name!="POD"})) / sum(kube_node_status_allocatable_memory_bytes {node=~"localhost"}) * 100 < 10
           annotations:
             miqTarget: "ContainerNode"
             severity: "HIGH"
-            message: "{{$labels.instance}} utilized memory exceeds 400M"
+            message: "{{$labels.instance}} utilized memory is over 90%"
         - alert: Memory Requests
           expr: sum(sum(kube_node_status_allocatable_memory_bytes {node=~"localhost"}) - sum(kube_pod_container_resource_requests_memory_bytes)) / sum(kube_node_status_allocatable_memory_bytes {node=~"localhost"}) * 100 < 30
           annotations:
             miqTarget: "ContainerNode"
             severity: "HIGH"
             message: "{{$labels.instance}} Memory requests are over 70%"
+        - alert: CPU Consumption 
+          expr: sum( sum(kube_node_status_allocatable_cpu_cores {node=~"localhost"}) - sum (rate (container_cpu_usage_seconds_total {container_name=~".+", container_name!="POD", instance=~"localhost"} [5m]))) / sum(kube_node_status_allocatable_cpu_cores {node=~"localhost"}) * 100 < 10
+          annotations:
+            miqTarget: "ContainerNode"
+            severity: "HIGH"
+            message: "{{$labels.instance}} utilized CPU is over 90%"
         - alert: CPU Requests
           expr: sum(sum(kube_node_status_allocatable_cpu_cores{node=~"localhost"}) - sum(kube_pod_container_resource_requests_cpu_cores{node=~"localhost"})) / sum(kube_node_status_allocatable_cpu_cores{node=~"localhost"}) * 100 < 30
           annotations:
