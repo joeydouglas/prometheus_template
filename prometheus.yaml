@@ -264,7 +264,7 @@ objects:
             message: "{{$labels.instance}} utilized memory is over 90%"
             description: "{{$labels.instance}} utilized memory is over 90%"
         - alert: Memory Requests
-          expr: sum(sum(kube_node_status_allocatable_memory_bytes {node=~".+"}) - sum(kube_pod_container_resource_requests_memory_bytes)) / sum(kube_node_status_allocatable_memory_bytes {node=~".+"}) * 100 < 30
+          expr: sum by (node) (sum by (node) (kube_node_status_allocatable_memory_bytes {node=~".+"}) - sum by (node) (kube_pod_container_resource_requests_memory_bytes)) / sum by (node) (kube_node_status_allocatable_memory_bytes {node=~".+"}) * 100 < 30
           annotations:
             miqTarget: "ContainerNode"
             severity: "HIGH"
@@ -278,12 +278,11 @@ objects:
             message: "{{$labels.instance}} utilized CPU is over 90%"
             description: "{{$labels.instance}} utilized CPU is over 90%"
         - alert: CPU Requests
-          expr: sum(sum(kube_node_status_allocatable_cpu_cores{node=~".+"}) - sum(kube_pod_container_resource_requests_cpu_cores{node=~".+"})) / sum(kube_node_status_allocatable_cpu_cores{node=~".+"}) * 100 > 70
+          expr: sum by (node) (sum by (node) (kube_node_status_allocatable_cpu_cores {node=~".+"}) - sum by (node) (kube_pod_container_resource_requests_cpu_cores{node=~".+"})) / sum by (node) (kube_node_status_allocatable_cpu_cores{node=~".+"}) * 100 > 70
           annotations:
             miqTarget: "ContainerNode"
             severity: "HIGH"
-            message: "{{$labels.instance}} CPU requests are over 70%"
-            description: "{{$labels.instance}} CPU requests are over 70%"
+            description: "{{$labels.node}} CPU requests are over 70%"
         - alert: File System Error 
           expr: sum(node_filesystem_device_error) > 0
           annotations:
@@ -537,3 +536,4 @@ objects:
         webhook_configs:
             - send_resolved: true 
               url: 'https://chat.consulting.redhat.com/hooks/RYkNxBHdJhNjF8vR5/NfkFPwCK6bXHcFi74QWw3ygYxEnom6PnYMXLJLyJqhawEtxp'
+              #url: 'http://10.20.204.138:8080/alerts'
