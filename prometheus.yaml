@@ -278,7 +278,7 @@ objects:
             message: "{{$labels.instance}} utilized CPU is over 90%"
             description: "{{$labels.instance}} utilized CPU is over 90%"
         - alert: CPU Requests
-          expr: sum by (node) (sum by (node) (kube_node_status_allocatable_cpu_cores {node=~".+"}) - sum by (node) (kube_pod_container_resource_requests_cpu_cores{node=~".+"})) / sum by (node) (kube_node_status_allocatable_cpu_cores{node=~".+"}) * 100 > 70
+          expr: sum by (node) (sum by (node) (kube_node_status_allocatable_cpu_cores) - sum by (node) (kube_pod_container_resource_requests_cpu_cores)) / sum by (node) (kube_node_status_allocatable_cpu_cores) * 100 < 30
           annotations:
             miqTarget: "ContainerNode"
             severity: "HIGH"
