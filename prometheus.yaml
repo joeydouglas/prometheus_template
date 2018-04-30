@@ -271,7 +271,7 @@ objects:
             message: "{{$labels.instance}} Memory requests are over 70%"
             description: "{{$labels.instance}} Memory requests are over 70%"
         - alert: CPU Consumption 
-          expr: sum( sum(kube_node_status_allocatable_cpu_cores {node=~".+"}) - sum (rate (container_cpu_usage_seconds_total {container_name=~".+", container_name!="POD", instance=~".+"} [5m]))) / sum(kube_node_status_allocatable_cpu_cores {node=~".+"}) * 100 < 10
+          expr: 100 - (avg by (instance) (irate(node_cpu{mode="idle"}[5m])) * 100) > 90 
           annotations:
             miqTarget: "ContainerNode"
             severity: "HIGH"
