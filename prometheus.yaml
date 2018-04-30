@@ -257,7 +257,7 @@ objects:
             message: "{{$labels.instance}} is down"
             description: "{{$labels.instance}} is down"
         - alert: Memory Consumption 
-          expr: sum(sum(kube_node_status_allocatable_memory_bytes {node=~".+"}) - sum(container_memory_usage_bytes {instance=~".+", container_name=~".+", container_name!="POD"})) / sum(kube_node_status_allocatable_memory_bytes {node=~".+"}) * 100 < 10
+          expr: sum by(instance) (sum by (instance) (node_memory_MemTotal) - sum by (instance) (node_memory_MemFree)) / sum by (instance) (node_memory_MemTotal) * 100 > 90
           annotations:
             miqTarget: "ContainerNode"
             severity: "HIGH"
@@ -352,6 +352,7 @@ objects:
         relabel_configs:
         - action: labelmap
           regex: __meta_kubernetes_node_label_(.+)
+       
 
       # Scrape config for controllers.
       #
@@ -382,7 +383,7 @@ objects:
           target_label: __address__
           regex: (.+)(?::\d+)
           replacement: $1:8444
-
+       
       # Scrape config for cAdvisor.
       #
       # Beginning in Kube 1.7, each node exposes a /metrics/cadvisor endpoint that
@@ -457,7 +458,7 @@ objects:
         - source_labels: [__meta_kubernetes_service_name]
           action: replace
           target_label: kubernetes_name
-
+ 
       - job_name: 'openshift-template-service-broker'
 
         scheme: https
